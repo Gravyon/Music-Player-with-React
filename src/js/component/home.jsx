@@ -1,50 +1,125 @@
-import React, {useState} from "react";
-
-//include images into your bundle
-import rigoImage from "../../img/rigo-baby.jpg";
+import React, {useState, useEffect, useRef} from "react";
 
 //create your first component
 const Home = () => {
-	const [tarea, setTarea]=useState("");
-	const [listaTareas, setListaTareas]=useState([]);
+	const [songList, setSongList]=useState([]);
+	const [song, setSong] = useState([0,""]);
+	const songRef = useRef(null);
+	const urlSource = "https://assets.breatheco.de/apis/sound/"
+	const playList = songList.length;
+	const [songStatus, setSongStatus] = useState("fas fa-play");
 
-	const handleSubmit = (e) => { 
-		e.preventDefault()
-		setTarea("");
+	function getSongs() {
+		fetch('https://assets.breatheco.de/apis/sound/songs') //ir a busca
+			.then((response) => response.json()) //promesa 1
+			.then((data) => setSongList(data)) //promesa 2
+			.catch((err) => console.log(err))
 	}
-	const handleClick = () => {
 
-		if (!tarea == "") {
-			setListaTareas([...listaTareas, tarea])
+// Comienza la playlist
+
+	const clickPlay = (index,url) => {	
+		setSongStatus("fas fa-pause")
+		setSong([index, url])
+		songRef.current.src = url;
+		songRef.current.play();
+		// setShow(show);
+	}
+
+	// // Pausa la playlist
+	// const clickPause = (index,url) => {
+	// 	setSong([index,url])
+	// 	songRef.current.src = url;
+	// 	songRef.current.pause();
+	// 	setShow(!show);
+	// }
+// Controla siguiente o anterior cancion
+	// const audioPlay = (index, url) => {
+	// 	setSong([index,url])
+	// 	songRef.current.src = url;
+	// 	songRef.current.play();
+	// 	setShow(!show);	
+	// }
+
+	const togglePlayPause = () => {
+		// option ? :songRef.current.paused
+		// option === "play" ? songRef.current.	pause() : songRef.current.play()
+		console.log(songStatus);
+		
+		if (!songRef.current.paused) {
+			setSongStatus("fas fa-play")
+			songRef.current.pause()
 		}
 		else {
-			return (
-			alert("No hay tareas, agrega una tarea")
-			)
+			setSongStatus("fas fa-pause")
+			songRef.current.play()
 		}
 	}
-	const handleRemoveTarea = (id) => {
-		// console.log(id)
-		setListaTareas(listaTareas.filter((item,index)=>index !== id))
+
+	const clickNext = () => {
+		// index = song + urlSource+songList[song[0]+1].url
+		if (song[0] === playList-1) {
+			setSong([0, urlSource+songList[0].url])
+			songRef.current.src = urlSource+songList[0].url;
+		}
+		else{
+			setSong([song[0]+1, urlSource+songList[song[0]+1].url])
+			songRef.current.src = urlSource+songList[song[0]+1].url;
+		}
+		songRef.current.play();
+		console.log(songRef)
+		console.log(songRef.current.paused);
 	}
 
-	console.log(listaTareas);
-	return (
+	const clickPrevious = () => {
 
-	<form className="container-fluid" onSubmit={handleSubmit} style={{width : "30rem", height: "30rem", float: "left"}}>
-	<div className="mb-3">
-		<label className="form-label mt-3"><h1>TODO</h1></label>
-		<input maxLength={"25"} onChange={(e) => setTarea(e.target.value)} value={tarea} placeholder="Anota tu tarea" type="text" className="form-control" id="tarea"/>
+		if (song[0] === 0) {
+			setSong([playList-1, urlSource+songList[playList-1].url])
+			songRef.current.src = urlSource+songList[playList-1].url;
+		}
+		else{
+			setSong([song[0]-1, urlSource+songList[song[0]-1].url])
+			songRef.current.src = urlSource+songList[song[0]-1].url;
+		}
+
+		songRef.current.play();
+		console.log(songRef)
+		console.log(songRef.current.paused);
+	}
+
+	// console.log(urlSource+songList.url, song)
+	// {show ? (
+	// 	<button onClick={()=>togglePlayPause({songStatus})} className="bg-dark text-white border-dark mx-2 d-flex"><i className={songStatus === "pause" ? "fas fa-play" : "fas fa-pause"}></i></button>
+	// 	{/* // ) : ( */}
+	// 	{/* // <button onClick={()=>togglePlayPause("play")} className="bg-dark text-white border-dark mx-2 d-flex"><i className="fas fa-pause"></i></button> */}
+	// 	{/* // )} */}
+
+	useEffect(()=>{
+		getSongs()
+	},[])
+
+	// console.log(songList);
+	return (
+<div className="bg-dark">
+			<div className="list-group bg-dark">
+			<li className="list-group-item list-group-item-action d-inline text-white bg-dark sticky-top">Playlist length : {songList.length}</li>
+			{songList.map((item, index) => 
+			<button type="button" onClick={()=>clickPlay(index,urlSource+item.url)} className="lista list-group-item list-group-item-action  d-flex" key={index}>
+			<audio ref={songRef} src=""></audio>
+			{index+1} : {item.name}</button>)}
+		</div>
+	<div className="navbar navbar-expand-sm bg-dark navbar-dark position-sticky bottom-0 text-center p-3 text-white">
+	<div className="navbar navbar-expand-sm bg-dark navbar-dark position-sticky bottom-0 text-center p-3 text-white d-flex justify-content-center">
+			<button onClick={()=>clickPrevious()} className="bg-dark text-white border-dark d-flex"><i className="fas fa-backward "></i></button>
+			<button onClick={()=>togglePlayPause()} className="bg-dark text-white border-dark mx-2 d-flex"><i className={songStatus}></i></button>
+			<button onClick={()=>clickNext()} className="bg-dark text-white border-dark d-flex"><i className="fas fa-forward"></i></button>
+			<audio ref={songRef} src=""></audio>
+		</div>
+		<div className="d-flex justify-content-end">
+		© 2022 Copyright: Nintendo
+		</div>
 	</div>
-	<button type="submit" onClick={handleClick} className="btn btn-primary">New Task</button>
-	<ul className="list-group mt-3">
-	{listaTareas.map((tarea, i) => 
-	<li className="tarea-none list-group-item list-group-item-light p-2" key={i}>
-	<button type="button" onClick={() => handleRemoveTarea(i)}  className="btn-close" style={{float: "right"}}></button>
-	<h3>{tarea}</h3></li>)}
-	<li className="list-group-item list-group-item-light d-inline-flex p-2">Tareas a hacer: {listaTareas.length}</li>
-	</ul>
-	</form>
+</div>
 	);
 };
 

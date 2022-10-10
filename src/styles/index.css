@@ -1,7 +1,9 @@
-.tarea-none button {
-    display: none
-}
+ .lista {
+     background-color: rgba(40, 15, 94, 0.643);
+     color: white;
+ }
 
-.tarea-none:hover button {
-    display: block
-}
+ .lista:hover {
+     background-color: rgb(62, 23, 151);
+     color: white;
+ }
