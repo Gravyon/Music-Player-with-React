@@ -9,6 +9,7 @@ const Home = () => {
 	const playList = songList.length;
 	const [songStatus, setSongStatus] = useState("fas fa-play");
 
+	// Busca las canciones en la API
 	function getSongs() {
 		fetch('https://assets.breatheco.de/apis/sound/songs') //ir a busca
 			.then((response) => response.json()) //promesa 1
@@ -16,7 +17,7 @@ const Home = () => {
 			.catch((err) => console.log(err))
 	}
 
-// Comienza la playlist
+// Comienza la playlist segun la seleccion
 
 	const clickPlay = (index,url) => {	
 		setSongStatus("fas fa-pause")
@@ -25,22 +26,7 @@ const Home = () => {
 		songRef.current.play();
 		// setShow(show);
 	}
-
-	// // Pausa la playlist
-	// const clickPause = (index,url) => {
-	// 	setSong([index,url])
-	// 	songRef.current.src = url;
-	// 	songRef.current.pause();
-	// 	setShow(!show);
-	// }
-// Controla siguiente o anterior cancion
-	// const audioPlay = (index, url) => {
-	// 	setSong([index,url])
-	// 	songRef.current.src = url;
-	// 	songRef.current.play();
-	// 	setShow(!show);	
-	// }
-
+// Alterna entre play/pause
 	const togglePlayPause = () => {
 		// option ? :songRef.current.paused
 		// option === "play" ? songRef.current.	pause() : songRef.current.play()
@@ -55,9 +41,8 @@ const Home = () => {
 			songRef.current.play()
 		}
 	}
-
+// Siguiente cancion
 	const clickNext = () => {
-		// index = song + urlSource+songList[song[0]+1].url
 		if (song[0] === playList-1) {
 			setSong([0, urlSource+songList[0].url])
 			songRef.current.src = urlSource+songList[0].url;
@@ -70,13 +55,14 @@ const Home = () => {
 		console.log(songRef)
 		console.log(songRef.current.paused);
 	}
-
+// Cancion anterior
 	const clickPrevious = () => {
-
+		// Si el indice es 0, va al final
 		if (song[0] === 0) {
 			setSong([playList-1, urlSource+songList[playList-1].url])
 			songRef.current.src = urlSource+songList[playList-1].url;
 		}
+		//Si el indice es el final de la playlist, va al principio
 		else{
 			setSong([song[0]-1, urlSource+songList[song[0]-1].url])
 			songRef.current.src = urlSource+songList[song[0]-1].url;
@@ -87,24 +73,15 @@ const Home = () => {
 		console.log(songRef.current.paused);
 	}
 
-	// console.log(urlSource+songList.url, song)
-	// {show ? (
-	// 	<button onClick={()=>togglePlayPause({songStatus})} className="bg-dark text-white border-dark mx-2 d-flex"><i className={songStatus === "pause" ? "fas fa-play" : "fas fa-pause"}></i></button>
-	// 	{/* // ) : ( */}
-	// 	{/* // <button onClick={()=>togglePlayPause("play")} className="bg-dark text-white border-dark mx-2 d-flex"><i className="fas fa-pause"></i></button> */}
-	// 	{/* // )} */}
-
 	useEffect(()=>{
 		getSongs()
 	},[])
-
-	// console.log(songList);
 	return (
 <div className="bg-dark">
 			<div className="list-group bg-dark">
 			<li className="list-group-item list-group-item-action d-inline text-white bg-dark sticky-top">Playlist length : {songList.length}</li>
 			{songList.map((item, index) => 
-			<button type="button" onClick={()=>clickPlay(index,urlSource+item.url)} className="lista list-group-item list-group-item-action  d-flex" key={index}>
+			<button type="button" onClick={()=>clickPlay(index,urlSource+item.url)} className="lista list-group-item list-group-item-action d-flex" key={index}>
 			<audio ref={songRef} src=""></audio>
 			{index+1} : {item.name}</button>)}
 		</div>
